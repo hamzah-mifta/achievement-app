@@ -1,7 +1,7 @@
 <template>
 <div class="login">
   <h3 class="center">Login</h3>
-  <form @submit.prevent="handleSubmit">
+  <form @submit.prevent="login">
     <!-- input email -->
     <div class="input-group">
       <div class="input-group-prepend">
@@ -9,7 +9,7 @@
           <i class="pe-7s-mail"></i>
         </span>
       </div>
-      <input type="email" class="form-control" placeholder="email" v-model="email">
+      <input type="email" class="form-control" placeholder="email" required v-model="email">
     </div>
     <!-- input password -->
     <div class="input-group">
@@ -18,7 +18,7 @@
           <i class="pe-7s-key"></i>
         </span>
       </div>
-      <input type="password" class="form-control" placeholder="password" v-model="password">
+      <input type="password" class="form-control" placeholder="password" required v-model="password">
     </div>
     <!-- remember me -->
     <div class="position-relative form-check">
@@ -36,29 +36,44 @@
 </template>
 
 <script>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import useLogin from '@/composables/useLogin'
+import useToken from '@/composables/useToken'
 
 export default {
-  setup() {
-    const router = useRouter()
-    const { error, login } = useLogin()
-
-    const email = ref('')
-    const password = ref('')
-    const remember_me = ref(false)
-
-    const handleSubmit = async () => {
-      const res = await login(email.value, password.value, remember_me.value)
-      if (!error.value) {
-        router.push({ name: 'Home' })
-      }
-      return res
+  data() {
+    return {
+      email: '',
+      password: '',
+      remember_me: false,
+      error: null
     }
+  },
+  methods: {
+    async login() {
+      const { storeToken } = useToken()
 
-    return { email, password, remember_me, handleSubmit}
+      await axios.post(`http://127.0.0.1:8000/api/login`, {
+        email: this.email,
+        password: this.password,
+        remember_me: this.remember_me
+      })
+      .then(response => {
+        storeToken(response)
+        this.$router.push({ name: 'Home' })
+        Toast.fire({
+          icon: 'success',
+          title: 'Successfully logged in'
+        })
+      })
+      .catch(err => {
+        this.error = err.response
+        Toast.fire({
+          icon: 'error',
+          title: 'Login failed'
+        })
+      })
+    } 
   }
+
 }
 </script>
 

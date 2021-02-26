@@ -71,7 +71,7 @@
       </div>
 
       <!-- right navbar -->
-      <div v-if="user" class="app-header-right">
+      <div class="app-header-right">
         <div class="header-btn-lg pr-0">
           <div class="widget-content p-0">
             <div class="widget-content-wrapper">
@@ -80,10 +80,10 @@
               <div class="widget-content-left  ml-3 header-user-info">
                 <div>
                   <div class="widget-heading">
-                    {{ user.name }}
+                    user.name 
                   </div>
                   <div class="widget-subheading">
-                    {{ user.email }}
+                     user.email 
                   </div>
                 </div>
               </div>
@@ -98,7 +98,7 @@
                   
                   <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
                     <button type="button" tabindex="0" class="dropdown-item">My Account</button>
-                    <button type="button" tabindex="0" class="dropdown-item" @click="handleLogout">Logout</button>
+                    <button type="button" tabindex="0" class="dropdown-item" @click="logout">Logout</button>
                   </div>
                 </div>
               </div>  
@@ -111,9 +111,9 @@
       <!-- END right navbar -->
 
       <!-- START right navbar if no user -->
-      <div v-else class="app-header-right">
+      <!-- <div v-else class="app-header-right">
         <router-link :to="{ name: 'Login'}" class="mb-2 mr-2 border-0 btn-transition btn btn-primary">Login</router-link>
-      </div>
+      </div> -->
       <!-- END right navbar if no user -->
 
     </div>
@@ -121,26 +121,45 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-import getUser from '@/composables/getUser'
-import useLogout from '@/composables/useLogout'
-import { onUpdated, watch, watchEffect } from 'vue'
+import useToken from '@/composables/useToken'
 
 export default {
-  setup() {
-    const { user, error } = getUser()
-    const { logout } = useLogout()
-    const router = useRouter()
-    // const isLoggedIn = ref(false)
+  data() {
+    return {
+      error: null,
+    }
+  },
+  methods: {
+    logout() {
+      const { clearToken } = useToken()
 
-    const handleLogout = async () => {
-      await logout()
-      router.push({ name: 'Login' })
-    } 
-
-    return { user, error, handleLogout }
+      Swal.fire({
+        title: 'Confirm Logout',
+        text: "Are you sure you want to logout?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d92550',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Logout'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          axios.get(`http://127.0.0.1:8000/api/logout`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          })
+          .then(() => {
+            clearToken()
+            Toast.fire({
+              icon: 'success',
+              title: 'Successfully logged out'
+            })
+            this.$router.push({ name: 'Login' })
+          })
+          .catch(err => this.error = err.response)       
+        }
+      })
+    }
   }
 }
 </script>

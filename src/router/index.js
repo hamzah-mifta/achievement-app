@@ -19,7 +19,7 @@ const authRequired = (to, from, next) => {
 const noAuthRequired = (to, from, next) => {
   let token = localStorage.getItem('token')
 
-  if (token) {
+  if (token !== null) {
     next({ name: 'Home' })
   } else {
     next()

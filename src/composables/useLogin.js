@@ -1,5 +1,10 @@
 import axios from "axios";
 import { ref } from 'vue'
+import useToken from './useToken'
+import Swal from 'sweetalert2'
+
+
+const { storeToken } = useToken()
 
 const error = ref(null)
 const isPending = ref(false)
@@ -8,20 +13,24 @@ const login = async (email, password, remember_me) => {
   error.value = null
   isPending.value = true
 
-  const res = axios.post('http://127.0.0.1:8000/api/login', {
+  axios.post('http://127.0.0.1:8000/api/login', {
       email: email,
       password: password,
       remember_me: remember_me
     })
     .then(res => {
-      // console.log(res)
-      localStorage.setItem('token', res.data.data.access_token)
+      // console.log(res.data.data.userToken)
+      storeToken(res)
       isPending.value = false
     })
     .catch(err => {
-      error.value = err
-      isPending.value = false
-      console.log(error.value)
+      // console.log(err.response)
+      error.value = 'Invalid email or password'
+      Toast.fire({
+        icon: 'error',
+        title: error.value,
+        body: error.value
+      })
     })
 }
 

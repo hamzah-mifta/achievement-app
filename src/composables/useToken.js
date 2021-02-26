@@ -4,8 +4,9 @@ const isValid = (token) => {
   
   if (payload) {
     return payload.iss = 'http://127.0.0.1:8000/api/login' || 'http://127.0.0.1:8000/api/register' ? true : false
+  } else {
+    return false
   }
-  return false
 }
 
 // mengambil token
@@ -15,11 +16,11 @@ const getToken = () => {
 
 // store token dari respone fetch data
 const storeToken = (res) => {
-  const token = res.data.data.access_token
+  const token = res.data.data.userToken
 
   if (isValid(token)) {
     localStorage.setItem('token', token)
-  }
+  } 
 }
 
 // menghapus token

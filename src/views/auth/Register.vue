@@ -10,7 +10,7 @@
           <i class="pe-7s-user"></i>
         </span>
       </div>
-      <input type="text" class="form-control" placeholder="name" v-model="name">
+      <input type="text" class="form-control" placeholder="name" required v-model="name">
     </div>
 
     <!-- input email -->
@@ -20,7 +20,7 @@
           <i class="pe-7s-mail"></i>
         </span>
       </div>
-      <input type="email" class="form-control" placeholder="email" v-model="email">
+      <input type="email" class="form-control" placeholder="email" required v-model="email">
     </div>
 
     <!-- input password -->
@@ -30,7 +30,7 @@
           <i class="pe-7s-key"></i>
         </span>
       </div>
-      <input type="password" class="form-control" placeholder="password" v-model="password">
+      <input type="password" class="form-control" placeholder="password" required v-model="password">
     </div>
 
     <!-- input password_confirmation -->
@@ -40,7 +40,7 @@
           <i class="pe-7s-door-lock"></i>
         </span>
       </div>
-      <input type="password" class="form-control" placeholder="password confirmation" v-model="password_confirmation">
+      <input type="password" class="form-control" placeholder="password confirmation" required v-model="password_confirmation">
     </div>
     
     <!-- submit -->
@@ -68,16 +68,20 @@ export default {
     }
   },
   methods: {
-    handleSubmit() {
-      axios.post(`http://127.0.0.1:8000/api/register`, {
+    async handleSubmit() {
+      await axios.post(`http://127.0.0.1:8000/api/register`, {
         name: this.name,
         email: this.email,
         password: this.password,
         password_confirmation: this.password_confirmation
       })
       .then(response => {
-        localStorage.setItem('token', response.data.data.token.token)
+        localStorage.setItem('token', response.data.data.token.userToken)
         this.$router.push({ name: 'Home' })
+        Toast.fire({
+          icon: 'success',
+          title: 'Successfully registered'
+        })
       })
       .catch(err => {
         this.error = err
